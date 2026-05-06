@@ -1,14 +1,25 @@
-// GLOBAL UI FUNCTIONS
+// ATTACH GLOBAL FUNCTIONS IMMEDIATELY
 window.switchTab = function(tabName, event) {
+    console.log("Switching to view:", tabName);
+    
+    // Hide all views
     document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
+    
+    // Show target view (IDs: view-today, view-trends, view-settings)
     const target = document.getElementById('view-' + tabName);
-    if (target) target.style.display = 'block';
+    if (target) {
+        target.style.display = 'block';
+    } else {
+        console.error("Missing view section: view-" + tabName);
+    }
 
+    // Update Tab UI
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
     if (event) {
         const item = event.currentTarget || event.target.closest('.tab-item');
         if (item) item.classList.add('active');
     }
+
     if (tabName === 'trends') window.updateTrends();
 };
 
@@ -18,7 +29,7 @@ window.updateWater = function(val) {
 };
 
 window.resetDay = function() {
-    if(confirm("Clear today's progress? This won't affect your Trends history.")) {
+    if(confirm("Reset today's progress?")) {
         localStorage.removeItem('fOS_habits');
         localStorage.removeItem('fOS_water');
         location.reload();
@@ -26,13 +37,13 @@ window.resetDay = function() {
 };
 
 window.clearHistory = function() {
-    if(confirm("PERMANENTLY delete all trend history? This cannot be undone.")) {
+    if(confirm("Delete all trend history? This is permanent!")) {
         localStorage.clear();
         location.reload();
     }
 };
 
-// APP LOGIC
+// DATA & LOGIC
 const habits = [
     { name: "Clean Eating", desc: "No sugar. Finish by 9 PM." },
     { name: "Protein Power", desc: "Palm-sized portion per meal." },
@@ -49,7 +60,6 @@ function initApp() {
     const today = new Date().toDateString();
     const lastVisit = localStorage.getItem('fOS_lastDate');
     
-    // Auto-archive and reset if it's a new day
     if (lastVisit && lastVisit !== today) {
         archiveDay(lastVisit);
         localStorage.removeItem('fOS_habits');
@@ -96,20 +106,20 @@ function refreshUI() {
     const percent = Math.round((score / total) * 100);
 
     const circle = document.getElementById('progress-circle');
+    const body = document.getElementById('app-body');
     if (circle) {
         circle.setAttribute('stroke-dasharray', `${percent}, 100`);
         circle.style.stroke = percent < 35 ? "#FF9500" : (percent < 100 ? "#007AFF" : "#34C759");
     }
 
-    document.getElementById('progress-percent').innerText = percent;
-    document.getElementById('water-count').innerText = waterBottles;
-    document.getElementById('water-ml').innerText = `${waterBottles * 900}/3600ml`;
+    if (document.getElementById('progress-percent')) document.getElementById('progress-percent').innerText = percent;
+    if (document.getElementById('water-count')) document.getElementById('water-count').innerText = waterBottles;
+    if (document.getElementById('water-ml')) document.getElementById('water-ml').innerText = `${waterBottles * 900}/3600ml`;
 }
 
-// TRENDS LOGIC
 function archiveDay(dateStr) {
     const history = JSON.parse(localStorage.getItem('fOS_history')) || [];
-    const score = document.getElementById('progress-percent').innerText;
+    const score = document.getElementById('progress-percent')?.innerText || 0;
     history.push({ date: dateStr, score: parseInt(score) });
     localStorage.setItem('fOS_history', JSON.stringify(history));
 }
@@ -117,10 +127,9 @@ function archiveDay(dateStr) {
 window.updateTrends = function() {
     const history = JSON.parse(localStorage.getItem('fOS_history')) || [];
     if (document.getElementById('stat-streak')) document.getElementById('stat-streak').innerText = history.length;
-    
-    if (history.length > 0) {
+    if (history.length > 0 && document.getElementById('stat-avg')) {
         const avg = Math.round(history.reduce((a, b) => a + b.score, 0) / history.length);
-        if (document.getElementById('stat-avg')) document.getElementById('stat-avg').innerText = avg + "%";
+        document.getElementById('stat-avg').innerText = avg + "%";
     }
 };
 
