@@ -53,13 +53,36 @@
     </main>
 
     <main id="view-trends" class="app-view" style="display:none;">
-        <header class="ios-header"><h1>Trends</h1></header>
+        <header class="ios-header">
+            <h1>Trends</h1>
+        </header>
         <section class="ios-card">
-            <div style="display:flex; justify-content:space-around; text-align:center;">
-                <div><span id="stat-streak" style="font-size:28px; font-weight:700; color:var(--ios-blue);">0</span><br><small>Days</small></div>
-                <div><span id="stat-avg" style="font-size:28px; font-weight:700; color:var(--ios-green);">0%</span><br><small>Avg</small></div>
+            <div style="display:flex; justify-content: space-around; text-align:center;">
+                <div class="stat-box">
+                    <span class="stat-val" id="stat-streak" style="display:block; font-size:28px; font-weight:700; color:var(--ios-blue);">0</span>
+                    <span class="stat-label" style="font-size:12px; color:#8E8E93;">Days Logged</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="stat-avg" style="display:block; font-size:28px; font-weight:700; color:var(--ios-green);">0%</span>
+                    <span class="stat-label" style="font-size:12px; color:#8E8E93;">Avg Score</span>
+                </div>
             </div>
         </section>
+    </main>
+
+    <main id="view-settings" class="app-view" style="display:none;">
+        <header class="ios-header">
+            <h1>Settings</h1>
+        </header>
+        <div class="ios-card">
+            <div class="settings-item" onclick="window.resetDay()" style="padding: 15px 0; border-bottom: 0.5px solid #eee; cursor:pointer;">
+                <span style="color:var(--ios-blue); font-weight:600;">Clear Today's Progress</span>
+            </div>
+            <div class="settings-item" onclick="window.clearHistory()" style="padding: 15px 0; cursor:pointer;">
+                <span style="color:#FF3B30; font-weight:600;">Reset All Trend History</span>
+            </div>
+        </div>
+        <p style="text-align:center; color:#8E8E93; font-size:12px; margin-top:20px;">FitnessOS v1.0</p>
     </main>
 
     <nav class="tab-bar">
