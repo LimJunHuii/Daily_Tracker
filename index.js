@@ -1,25 +1,13 @@
-// ATTACH GLOBAL FUNCTIONS IMMEDIATELY
 window.switchTab = function(tabName, event) {
-    console.log("Switching to view:", tabName);
-    
-    // Hide all views
     document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
-    
-    // Show target view (IDs: view-today, view-trends, view-settings)
     const target = document.getElementById('view-' + tabName);
-    if (target) {
-        target.style.display = 'block';
-    } else {
-        console.error("Missing view section: view-" + tabName);
-    }
+    if (target) target.style.display = 'block';
 
-    // Update Tab UI
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
     if (event) {
         const item = event.currentTarget || event.target.closest('.tab-item');
         if (item) item.classList.add('active');
     }
-
     if (tabName === 'trends') window.updateTrends();
 };
 
@@ -29,7 +17,7 @@ window.updateWater = function(val) {
 };
 
 window.resetDay = function() {
-    if(confirm("Reset today's progress?")) {
+    if(confirm("Reset today?")) {
         localStorage.removeItem('fOS_habits');
         localStorage.removeItem('fOS_water');
         location.reload();
@@ -37,13 +25,12 @@ window.resetDay = function() {
 };
 
 window.clearHistory = function() {
-    if(confirm("Delete all trend history? This is permanent!")) {
+    if(confirm("Clear all history?")) {
         localStorage.clear();
         location.reload();
     }
 };
 
-// DATA & LOGIC
 const habits = [
     { name: "Clean Eating", desc: "No sugar. Finish by 9 PM." },
     { name: "Protein Power", desc: "Palm-sized portion per meal." },
@@ -57,20 +44,19 @@ const habits = [
 let waterBottles = 0;
 
 function initApp() {
+    // Ensure the Today view is visible on load
+    window.switchTab('today');
+
     const today = new Date().toDateString();
     const lastVisit = localStorage.getItem('fOS_lastDate');
-    
     if (lastVisit && lastVisit !== today) {
-        archiveDay(lastVisit);
         localStorage.removeItem('fOS_habits');
         localStorage.removeItem('fOS_water');
     }
     localStorage.setItem('fOS_lastDate', today);
 
     const dateLabel = document.getElementById('current-date');
-    if (dateLabel) {
-        dateLabel.innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
-    }
+    if (dateLabel) dateLabel.innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
 
     const savedHabits = JSON.parse(localStorage.getItem('fOS_habits')) || {};
     waterBottles = parseInt(localStorage.getItem('fOS_water')) || 0;
@@ -97,7 +83,6 @@ function refreshUI() {
         state[i] = c.checked;
         if(c.checked) count++;
     });
-
     localStorage.setItem('fOS_habits', JSON.stringify(state));
     localStorage.setItem('fOS_water', waterBottles);
 
@@ -106,22 +91,13 @@ function refreshUI() {
     const percent = Math.round((score / total) * 100);
 
     const circle = document.getElementById('progress-circle');
-    const body = document.getElementById('app-body');
     if (circle) {
         circle.setAttribute('stroke-dasharray', `${percent}, 100`);
         circle.style.stroke = percent < 35 ? "#FF9500" : (percent < 100 ? "#007AFF" : "#34C759");
     }
-
     if (document.getElementById('progress-percent')) document.getElementById('progress-percent').innerText = percent;
     if (document.getElementById('water-count')) document.getElementById('water-count').innerText = waterBottles;
     if (document.getElementById('water-ml')) document.getElementById('water-ml').innerText = `${waterBottles * 900}/3600ml`;
-}
-
-function archiveDay(dateStr) {
-    const history = JSON.parse(localStorage.getItem('fOS_history')) || [];
-    const score = document.getElementById('progress-percent')?.innerText || 0;
-    history.push({ date: dateStr, score: parseInt(score) });
-    localStorage.setItem('fOS_history', JSON.stringify(history));
 }
 
 window.updateTrends = function() {
