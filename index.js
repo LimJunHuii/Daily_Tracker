@@ -1,3 +1,22 @@
+// Ensure functions are available globally before anything else
+window.switchTab = function(tabName, event) {
+    console.log("Navigating to:", tabName);
+    document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
+    const target = document.getElementById('view-' + tabName);
+    if (target) target.style.display = 'block';
+
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    if (event) {
+        const item = event.currentTarget || event.target.closest('.tab-item');
+        if (item) item.classList.add('active');
+    }
+};
+
+window.updateWater = function(val) {
+    waterBottles = Math.max(0, waterBottles + val);
+    refresh();
+};
+
 const habits = [
     { name: "Clean Eating", desc: "No sugar. Finish by 9 PM." },
     { name: "Protein Power", desc: "Palm-sized portion per meal." },
@@ -10,14 +29,11 @@ const habits = [
 
 let waterBottles = 0;
 
-// 1. Core initialization
 function init() {
-    console.log("FitnessOS Initializing...");
     const today = new Date().toDateString();
     const lastVisit = localStorage.getItem('fOS_lastDate');
     
     if (lastVisit && lastVisit !== today) {
-        archiveDay(lastVisit);
         localStorage.removeItem('fOS_habits');
         localStorage.removeItem('fOS_water');
     }
@@ -25,8 +41,7 @@ function init() {
 
     const dateLabel = document.getElementById('current-date');
     if (dateLabel) {
-        const options = { weekday: 'long', month: 'long', day: 'numeric' };
-        dateLabel.innerText = new Date().toLocaleDateString('en-US', options).toUpperCase();
+        dateLabel.innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
     }
 
     const savedHabits = JSON.parse(localStorage.getItem('fOS_habits')) || {};
@@ -36,28 +51,6 @@ function init() {
     refresh();
 }
 
-// 2. Navigation Logic (Fixes your console error)
-function switchTab(tabName, event) {
-    console.log("Switching to tab:", tabName);
-    // Hide all views
-    document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
-    
-    // Show target view
-    const target = document.getElementById('view-' + tabName);
-    if (target) target.style.display = 'block';
-
-    // Update Tab Bar UI
-    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-    } else if (event && event.target) {
-        event.target.closest('.tab-item').classList.add('active');
-    }
-
-    if (tabName === 'trends') updateTrends();
-}
-
-// 3. UI Updates
 function renderHabits(saved) {
     const list = document.getElementById('habit-list');
     if (!list) return;
@@ -71,16 +64,10 @@ function renderHabits(saved) {
         </div>`).join('');
 }
 
-function updateWater(val) {
-    waterBottles = Math.max(0, waterBottles + val);
-    refresh();
-}
-
 function refresh() {
     const checks = document.querySelectorAll('input[type="checkbox"]');
     const state = {};
     let count = 0;
-
     checks.forEach((c, i) => {
         state[i] = c.checked;
         if(c.checked) count++;
@@ -93,44 +80,16 @@ function refresh() {
     const score = count + Math.min(waterBottles, 4);
     const percent = Math.round((score / total) * 100);
 
-    // Update Progress Circle
     const circle = document.getElementById('progress-circle');
     if (circle) {
         circle.setAttribute('stroke-dasharray', `${percent}, 100`);
-        if (percent < 35) circle.style.stroke = "#FF9500";
-        else if (percent < 100) circle.style.stroke = "#007AFF";
-        else circle.style.stroke = "#34C759";
+        circle.style.stroke = percent < 35 ? "#FF9500" : (percent < 100 ? "#007AFF" : "#34C759");
     }
 
-    // Update Text Elements
-    const percentEl = document.getElementById('progress-percent');
-    const waterCountEl = document.getElementById('water-count');
-    const waterMlEl = document.getElementById('water-ml');
-
-    if (percentEl) percentEl.innerText = percent;
-    if (waterCountEl) waterCountEl.innerText = waterBottles;
-    if (waterMlEl) waterMlEl.innerText = `${waterBottles * 900}/3600ml`;
+    if (document.getElementById('progress-percent')) document.getElementById('progress-percent').innerText = percent;
+    if (document.getElementById('water-count')) document.getElementById('water-count').innerText = waterBottles;
+    if (document.getElementById('water-ml')) document.getElementById('water-ml').innerText = `${waterBottles * 900}/3600ml`;
 }
 
-// 4. Persistence & Trends
-function archiveDay(dateString) {
-    const history = JSON.parse(localStorage.getItem('fOS_history')) || [];
-    const score = document.getElementById('progress-percent')?.innerText || 0;
-    history.push({ date: dateString, score: parseInt(score) });
-    localStorage.setItem('fOS_history', JSON.stringify(history));
-}
-
-function updateTrends() {
-    const history = JSON.parse(localStorage.getItem('fOS_history')) || [];
-    const streakEl = document.getElementById('stat-streak');
-    const avgEl = document.getElementById('stat-avg');
-    
-    if (history.length > 0) {
-        const totalScore = history.reduce((sum, item) => sum + item.score, 0);
-        if (streakEl) streakEl.innerText = history.length;
-        if (avgEl) avgEl.innerText = Math.round(totalScore / history.length) + "%";
-    }
-}
-
-// Start the app
 window.onload = init;
+window.refresh = refresh;
