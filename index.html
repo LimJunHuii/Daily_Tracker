@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FitnessOS</title>
+    
+    <link rel="apple-touch-icon" href="icon.jpg">
+    
     <link rel="stylesheet" href="index.css">
 </head>
 <body id="app-body">
@@ -53,27 +56,23 @@
     </main>
 
     <main id="view-trends" class="app-view" style="display:none;">
-        <header class="ios-header">
-            <h1>Trends</h1>
-        </header>
+        <header class="ios-header"><h1>Trends</h1></header>
         <section class="ios-card">
             <div style="display:flex; justify-content: space-around; text-align:center;">
                 <div class="stat-box">
-                    <span class="stat-val" id="stat-streak" style="display:block; font-size:28px; font-weight:700; color:var(--ios-blue);">0</span>
-                    <span class="stat-label" style="font-size:12px; color:#8E8E93;">Days Logged</span>
+                    <span id="stat-streak" style="display:block; font-size:28px; font-weight:700; color:var(--ios-blue);">0</span>
+                    <small style="color:#8E8E93;">Days Logged</small>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-val" id="stat-avg" style="display:block; font-size:28px; font-weight:700; color:var(--ios-green);">0%</span>
-                    <span class="stat-label" style="font-size:12px; color:#8E8E93;">Avg Score</span>
+                    <span id="stat-avg" style="display:block; font-size:28px; font-weight:700; color:var(--ios-green);">0%</span>
+                    <small style="color:#8E8E93;">Avg Score</small>
                 </div>
             </div>
         </section>
     </main>
 
     <main id="view-settings" class="app-view" style="display:none;">
-        <header class="ios-header">
-            <h1>Settings</h1>
-        </header>
+        <header class="ios-header"><h1>Settings</h1></header>
         <div class="ios-card">
             <div class="settings-item" onclick="window.resetDay()" style="padding: 18px 0; border-bottom: 0.5px solid #eee; cursor:pointer;">
                 <span style="color:var(--ios-blue); font-weight:600;">Clear Today's Progress</span>

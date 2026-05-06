@@ -25,7 +25,7 @@ window.resetDay = function() {
 };
 
 window.clearHistory = function() {
-    if(confirm("Clear all history?")) {
+    if(confirm("Delete all history?")) {
         localStorage.clear();
         location.reload();
     }
@@ -44,12 +44,12 @@ const habits = [
 let waterBottles = 0;
 
 function initApp() {
-    // Ensure the Today view is visible on load
     window.switchTab('today');
-
     const today = new Date().toDateString();
     const lastVisit = localStorage.getItem('fOS_lastDate');
+    
     if (lastVisit && lastVisit !== today) {
+        archiveDay(lastVisit);
         localStorage.removeItem('fOS_habits');
         localStorage.removeItem('fOS_water');
     }
@@ -95,9 +95,16 @@ function refreshUI() {
         circle.setAttribute('stroke-dasharray', `${percent}, 100`);
         circle.style.stroke = percent < 35 ? "#FF9500" : (percent < 100 ? "#007AFF" : "#34C759");
     }
-    if (document.getElementById('progress-percent')) document.getElementById('progress-percent').innerText = percent;
-    if (document.getElementById('water-count')) document.getElementById('water-count').innerText = waterBottles;
-    if (document.getElementById('water-ml')) document.getElementById('water-ml').innerText = `${waterBottles * 900}/3600ml`;
+    document.getElementById('progress-percent').innerText = percent;
+    document.getElementById('water-count').innerText = waterBottles;
+    document.getElementById('water-ml').innerText = `${waterBottles * 900}/3600ml`;
+}
+
+function archiveDay(dateStr) {
+    const history = JSON.parse(localStorage.getItem('fOS_history')) || [];
+    const score = document.getElementById('progress-percent')?.innerText || 0;
+    history.push({ date: dateStr, score: parseInt(score) });
+    localStorage.setItem('fOS_history', JSON.stringify(history));
 }
 
 window.updateTrends = function() {
