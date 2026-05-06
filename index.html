@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FitnessOS</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body id="app-body">
+
+<div id="app-container">
+    
+    <main id="view-today" class="app-view">
+        <header class="ios-header">
+            <span class="date-label" id="current-date">---</span>
+            <h1>Today</h1>
+        </header>
+
+        <div id="motivation-image-container" class="ios-card motivation-banner">
+            <img id="motivation-img" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80" alt="Motivation">
+        </div>
+
+        <section class="main-card glass">
+            <div class="card-content">
+                <div class="text-group">
+                    <h3>Daily Goal</h3>
+                    <p><span id="progress-percent">0</span>% Completed</p>
+                    <small id="motivational-quote">Let's get started!</small>
+                </div>
+                <div class="progress-circle-container">
+                    <svg viewBox="0 0 36 36" class="circular-chart">
+                        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path id="progress-circle" class="circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <section class="ios-card">
+            <div class="card-header">
+                <span class="icon">💧</span>
+                <h4 style="display:inline; margin-left:10px;">Hydration</h4>
+                <span class="goal-text" id="water-ml" style="float:right; color:#8E8E93;">0/3600ml</span>
+            </div>
+            <div class="water-stepper">
+                <button class="step-btn" onclick="updateWater(-1)">−</button>
+                <div class="bottle-display">
+                    <span id="water-count">0</span> <small>Bottles</small>
+                </div>
+                <button class="step-btn" onclick="updateWater(1)">+</button>
+            </div>
+        </section>
+
+        <div class="section-title">Daily Checklist</div>
+        <section id="habit-list" class="habit-stack"></section>
+    </main>
+
+    <main id="view-trends" class="app-view" style="display:none;">
+        <header class="ios-header">
+            <h1>Trends</h1>
+        </header>
+        <section class="ios-card">
+            <div class="stats-row">
+                <div class="stat-box">
+                    <span class="stat-val" id="stat-streak">0</span>
+                    <span class="stat-label">Days Logged</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="stat-avg">0%</span>
+                    <span class="stat-label">Avg Score</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <main id="view-settings" class="app-view" style="display:none;">
+        <header class="ios-header">
+            <h1>Settings</h1>
+        </header>
+        <div class="settings-group">
+            <div class="settings-item" onclick="resetDay()">
+                <span style="color:var(--ios-blue); font-weight:500;">Clear Today's Progress</span>
+            </div>
+            <div class="settings-item" onclick="clearHistory()">
+                <span style="color:#FF3B30; font-weight:500;">Clear All Trend History</span>
+            </div>
+        </div>
+    </main>
+
+    <nav class="tab-bar">
+        <div class="tab-item active" onclick="switchTab('today', event)">
+            <span class="tab-icon">◎</span><small>Today</small>
+        </div>
+        <div class="tab-item" onclick="switchTab('trends', event)">
+            <span class="tab-icon">📊</span><small>Trends</small>
+        </div>
+        <div class="tab-item" onclick="switchTab('settings', event)">
+            <span class="tab-icon">⚙️</span><small>Settings</small>
+        </div>
+    </nav>
+
+</div>
+
+<script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+:root {
+    --ios-blue: #007AFF;
+    --ios-green: #34C759;
+    --ios-orange: #FF9500;
+    --ios-purple: #AF52DE;
+    --ios-bg: #F2F2F7;
+    --ios-card: rgba(255, 255, 255, 0.95);
+    --text-main: #000000;
+    --text-sec: #8E8E93;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    background: var(--ios-bg);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    margin: 0;
+    padding-bottom: env(safe-area-inset-bottom, 100px);
+    transition: background 1s ease;
+    min-height: 100vh;
+}
+
+#app-container { 
+    padding: 20px; 
+    max-width: 500px; 
+    margin: auto; 
+    width: 100%;
+}
+
+.ios-header { margin: 40px 0 20px 5px; }
+h1 { font-size: 34px; margin: 5px 0; font-weight: 700; }
+
+.motivation-banner {
+    padding: 0 !important;
+    overflow: hidden;
+    height: 180px;
+    border: none;
+}
+
+.motivation-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ios-card, .main-card {
+    background: var(--ios-card);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.main-card.goal-reached {
+    border: 2px solid var(--ios-green);
+    transform: scale(1.02);
+}
+
+.card-content { display: flex; justify-content: space-between; align-items: center; }
+.circular-chart { width: 80px; height: 80px; transform: rotate(-90deg); }
+.circle-bg { fill: none; stroke: rgba(0,0,0,0.05); stroke-width: 3.8; }
+.circle { 
+    fill: none; 
+    stroke: var(--ios-blue); 
+    stroke-width: 3.8; 
+    stroke-linecap: round; 
+    transition: stroke-dasharray 0.8s ease, stroke 0.5s ease; 
+}
+
+#motivational-quote {
+    font-size: 13px;
+    color: var(--text-sec);
+    margin-top: 8px;
+    display: block;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.water-stepper { display: flex; justify-content: space-around; align-items: center; margin-top: 15px; }
+.step-btn {
+    width: 44px; height: 44px; border-radius: 50%; border: none;
+    background: #E9E9EB; font-size: 24px; color: var(--ios-blue);
+    cursor: pointer;
+}
+
+.habit-stack { background: var(--ios-card); border-radius: 20px; overflow: hidden; }
+.habit-item {
+    display: flex; align-items: center; padding: 18px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.05);
+}
+
+.stats-row { display: flex; justify-content: space-around; text-align: center; }
+.stat-val { display: block; font-size: 28px; font-weight: 700; color: var(--ios-blue); }
+
+.tab-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; 
+    height: calc(85px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.85); 
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    display: flex; justify-content: space-around; 
+    border-top: 0.5px solid rgba(0,0,0,0.1);
+    padding-top: 10px;
+}
+.tab-item { color: var(--text-sec); display: flex; flex-direction: column; align-items: center; }
+.tab-item.active { color: var(--ios-blue); }
