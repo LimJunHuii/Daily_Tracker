@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+// 1. Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyBv911trXTVrZKvLGdLorWfGi8BGAssgZU",
     authDomain: "fitnessos-cb0b8.firebaseapp.com",
@@ -13,7 +14,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const syncKey = "user_one_tracker"; // Changed to a simpler key
+
+// 2. YOUR SECRET PASSCODE (Matches your Firebase Rules)
+const syncKey = "Kaze@051588"; 
 
 const habits = [
     { name: "Morning Protein", desc: "2 eggs + milk/soy milk. Avoid heavy carbs." },
@@ -28,7 +31,7 @@ const habits = [
 
 let waterBottles = 0;
 
-// Force Global Functions
+// 3. Global Functions for Buttons
 window.switchTab = (tabName, event) => {
     document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
     const target = document.getElementById('view-' + tabName);
@@ -46,6 +49,7 @@ window.refreshUI = () => {
     saveData();
 };
 
+// 4. Data Sync Logic
 function saveData() {
     const checks = document.querySelectorAll('input[type="checkbox"]');
     const habitState = {};
@@ -57,6 +61,7 @@ function saveData() {
 
     const percent = Math.round(((count + Math.min(waterBottles, 4)) / (habits.length + 4)) * 100);
 
+    // Saving to your specific "Passcode" folder
     set(ref(db, `users/${syncKey}/today`), {
         habits: habitState,
         water: waterBottles,
@@ -65,20 +70,19 @@ function saveData() {
     });
 }
 
-// THE LISTENER
+// 5. The "Live" Listener
 onValue(ref(db, `users/${syncKey}/today`), (snapshot) => {
-    console.log("Data received from Cloud...");
     const data = snapshot.val() || {};
     const savedHabits = data.habits || {};
     waterBottles = data.water || 0;
     const percent = data.percent || 0;
 
-    // Render Habits
+    // Draw Habit List
     const list = document.getElementById('habit-list');
     if (list) {
         list.innerHTML = habits.map((h, i) => `
-            <div class="habit-item">
-                <input type="checkbox" id="h-${i}" ${savedHabits[i] ? 'checked' : ''} onchange="window.refreshUI()">
+            <div class="habit-item" style="display:flex; align-items:center; padding:15px; border-bottom:1px solid #eee;">
+                <input type="checkbox" id="h-${i}" ${savedHabits[i] ? 'checked' : ''} onchange="window.refreshUI()" style="width:20px; height:20px;">
                 <div style="margin-left:15px">
                     <div style="font-weight:600">${h.name}</div>
                     <div style="font-size:12px; color:#8E8E93">${h.desc}</div>
@@ -86,10 +90,10 @@ onValue(ref(db, `users/${syncKey}/today`), (snapshot) => {
             </div>`).join('');
     }
 
-    // Update Text
-    document.getElementById('progress-percent').innerText = percent;
-    document.getElementById('water-count').innerText = waterBottles;
-    document.getElementById('water-ml').innerText = `${waterBottles * 900}/3600ml`;
+    // Update UI Stats
+    if(document.getElementById('progress-percent')) document.getElementById('progress-percent').innerText = percent;
+    if(document.getElementById('water-count')) document.getElementById('water-count').innerText = waterBottles;
+    if(document.getElementById('water-ml')) document.getElementById('water-ml').innerText = `${waterBottles * 900}/3600ml`;
     
     const circle = document.getElementById('progress-circle');
     if (circle) {
@@ -99,11 +103,15 @@ onValue(ref(db, `users/${syncKey}/today`), (snapshot) => {
 });
 
 async function updateDayCount() {
-    const histSnap = await get(ref(db, `users/${syncKey}/history`));
-    const historyData = histSnap.val() || {};
-    const count = Object.keys(historyData).length + 1;
-    const counterEl = document.getElementById('day-counter');
-    if (counterEl) counterEl.innerText = `DAY ${count}`;
+    try {
+        const histSnap = await get(ref(db, `users/${syncKey}/history`));
+        const historyData = histSnap.val() || {};
+        const count = Object.keys(historyData).length + 1;
+        const counterEl = document.getElementById('day-counter');
+        if (counterEl) counterEl.innerText = `DAY ${count}`;
+    } catch (e) {
+        console.log("History empty, starting Day 1");
+    }
 }
 
 window.onload = () => {
