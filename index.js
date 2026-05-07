@@ -13,9 +13,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const syncKey = "my-private-fitness-track"; 
+const syncKey = "user_one_tracker"; // Changed to a simpler key
 
-// YOUR BRAND NEW 8-POINT CHECKLIST
 const habits = [
     { name: "Morning Protein", desc: "2 eggs + milk/soy milk. Avoid heavy carbs." },
     { name: "Lunch Strategy", desc: "Veg/Meat first, Carbs last. Use corn/sweet potato." },
@@ -29,42 +28,25 @@ const habits = [
 
 let waterBottles = 0;
 
-async function checkDailyReset() {
-    const todayStr = new Date().toDateString();
-    const snapshot = await get(ref(db, `users/${syncKey}/today`));
-    const data = snapshot.val();
-
-    if (data && data.date !== todayStr) {
-        const historyRef = ref(db, `users/${syncKey}/history/${data.date.replace(/\s/g, '_')}`);
-        await set(historyRef, data);
-        await set(ref(db, `users/${syncKey}/today`), {
-            habits: {},
-            water: 0,
-            date: todayStr,
-            percent: 0
-        });
-    }
-}
-
-window.switchTab = function(tabName, event) {
+// Force Global Functions
+window.switchTab = (tabName, event) => {
     document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
     const target = document.getElementById('view-' + tabName);
     if (target) target.style.display = 'block';
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
     if (event) (event.currentTarget || event.target.closest('.tab-item')).classList.add('active');
-    if (tabName === 'trends') updateTrendsUI();
 };
 
-window.updateWater = function(val) {
+window.updateWater = (val) => {
     waterBottles = Math.max(0, waterBottles + val);
-    saveToCloud();
+    saveData();
 };
 
-window.refreshUI = function() {
-    saveToCloud();
+window.refreshUI = () => {
+    saveData();
 };
 
-function saveToCloud() {
+function saveData() {
     const checks = document.querySelectorAll('input[type="checkbox"]');
     const habitState = {};
     let count = 0;
@@ -83,16 +65,15 @@ function saveToCloud() {
     });
 }
 
+// THE LISTENER
 onValue(ref(db, `users/${syncKey}/today`), (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-        waterBottles = data.water || 0;
-        renderUI(data.habits || {}, data.water || 0, data.percent || 0);
-    }
-});
+    console.log("Data received from Cloud...");
+    const data = snapshot.val() || {};
+    const savedHabits = data.habits || {};
+    waterBottles = data.water || 0;
+    const percent = data.percent || 0;
 
-// Added "Day Count" logic here
-async function renderUI(savedHabits, water, percent) {
+    // Render Habits
     const list = document.getElementById('habit-list');
     if (list) {
         list.innerHTML = habits.map((h, i) => `
@@ -105,36 +86,29 @@ async function renderUI(savedHabits, water, percent) {
             </div>`).join('');
     }
 
-    // Calculate Streak
-    const histSnap = await get(ref(db, `users/${syncKey}/history`));
-    const historyData = histSnap.val() || {};
-    const dayCount = Object.keys(historyData).length + 1; // History + Today
-    
-    document.getElementById('day-counter').innerText = `DAY ${dayCount}`;
+    // Update Text
     document.getElementById('progress-percent').innerText = percent;
-    document.getElementById('water-count').innerText = water;
-    document.getElementById('water-ml').innerText = `${water * 900}/3600ml`;
+    document.getElementById('water-count').innerText = waterBottles;
+    document.getElementById('water-ml').innerText = `${waterBottles * 900}/3600ml`;
     
     const circle = document.getElementById('progress-circle');
     if (circle) {
         circle.setAttribute('stroke-dasharray', `${percent}, 100`);
         circle.style.stroke = percent < 35 ? "#FF9500" : (percent < 100 ? "#007AFF" : "#34C759");
     }
+});
+
+async function updateDayCount() {
+    const histSnap = await get(ref(db, `users/${syncKey}/history`));
+    const historyData = histSnap.val() || {};
+    const count = Object.keys(historyData).length + 1;
+    const counterEl = document.getElementById('day-counter');
+    if (counterEl) counterEl.innerText = `DAY ${count}`;
 }
 
-async function updateTrendsUI() {
-    const snapshot = await get(ref(db, `users/${syncKey}/history`));
-    const history = snapshot.val();
-    if (history) {
-        const entries = Object.values(history);
-        const avg = Math.round(entries.reduce((a, b) => a + b.percent, 0) / entries.length);
-        document.getElementById('stat-streak').innerText = entries.length + 1;
-        document.getElementById('stat-avg').innerText = avg + "%";
-    }
-}
-
-window.onload = async () => {
-    await checkDailyReset();
+window.onload = () => {
     window.switchTab('today');
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'}).toUpperCase();
+    updateDayCount();
+    const dateEl = document.getElementById('current-date');
+    if (dateEl) dateEl.innerText = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'}).toUpperCase();
 };
