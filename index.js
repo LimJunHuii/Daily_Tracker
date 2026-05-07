@@ -15,42 +15,37 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const syncKey = "my-private-fitness-track"; 
 
-// UPDATED HABITS LIST
+// YOUR BRAND NEW 8-POINT CHECKLIST
 const habits = [
-    { name: "Clean Eating", desc: "No refined sugar. Last meal by 9 PM." },
-    { name: "Whole Protein", desc: "Eggs/Meat/Tofu. Size of your palm." }, // NO POWDER NEEDED
-    { name: "8k-10k Steps", desc: "Active walking throughout the day." },
-    { name: "Strength Set", desc: "3x12: Squats, Pushups, Lunges, Plank." }, // DETAILED
-    { name: "HIIT Blast", desc: "30s on/15s off: Jacks, Climbers, Burpees." }, // DETAILED
-    { name: "Post-Meal Walk", desc: "Light 10 min walk after lunch/dinner." },
-    { name: "Recovery Sleep", desc: "7-8h quality sleep. No phone in bed." }
+    { name: "Morning Protein", desc: "2 eggs + milk/soy milk. Avoid heavy carbs." },
+    { name: "Lunch Strategy", desc: "Veg/Meat first, Carbs last. Use corn/sweet potato." },
+    { name: "Post-Workout Fuel", desc: "Protein within 1hr. No sugary drinks/cola." },
+    { name: "20 Squats", desc: "Daily squats for leg power (can do while brushing teeth)." },
+    { name: "Push-Up Set", desc: "One set to failure. Start on knees if needed." },
+    { name: "Daily Plank", desc: "Hold for 30s+ to build core strength and posture." },
+    { name: "Sleep (Before 11PM)", desc: "7+ hours. Phone away from bed." },
+    { name: "Active Habits", desc: "Walk every 45m, 10m sunlight, no alcohol." }
 ];
 
 let waterBottles = 0;
 
-// NEW: Auto-Reset Logic
 async function checkDailyReset() {
     const todayStr = new Date().toDateString();
     const snapshot = await get(ref(db, `users/${syncKey}/today`));
     const data = snapshot.val();
 
     if (data && data.date !== todayStr) {
-        // 1. Move old data to History/Log
         const historyRef = ref(db, `users/${syncKey}/history/${data.date.replace(/\s/g, '_')}`);
         await set(historyRef, data);
-
-        // 2. Reset the day in Cloud
         await set(ref(db, `users/${syncKey}/today`), {
             habits: {},
             water: 0,
             date: todayStr,
             percent: 0
         });
-        console.log("New day detected! Progress archived and reset.");
     }
 }
 
-// Global UI Functions
 window.switchTab = function(tabName, event) {
     document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
     const target = document.getElementById('view-' + tabName);
@@ -88,7 +83,6 @@ function saveToCloud() {
     });
 }
 
-// Real-time listener
 onValue(ref(db, `users/${syncKey}/today`), (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -97,7 +91,8 @@ onValue(ref(db, `users/${syncKey}/today`), (snapshot) => {
     }
 });
 
-function renderUI(savedHabits, water, percent) {
+// Added "Day Count" logic here
+async function renderUI(savedHabits, water, percent) {
     const list = document.getElementById('habit-list');
     if (list) {
         list.innerHTML = habits.map((h, i) => `
@@ -110,6 +105,12 @@ function renderUI(savedHabits, water, percent) {
             </div>`).join('');
     }
 
+    // Calculate Streak
+    const histSnap = await get(ref(db, `users/${syncKey}/history`));
+    const historyData = histSnap.val() || {};
+    const dayCount = Object.keys(historyData).length + 1; // History + Today
+    
+    document.getElementById('day-counter').innerText = `DAY ${dayCount}`;
     document.getElementById('progress-percent').innerText = percent;
     document.getElementById('water-count').innerText = water;
     document.getElementById('water-ml').innerText = `${water * 900}/3600ml`;
@@ -127,13 +128,13 @@ async function updateTrendsUI() {
     if (history) {
         const entries = Object.values(history);
         const avg = Math.round(entries.reduce((a, b) => a + b.percent, 0) / entries.length);
-        document.getElementById('stat-streak').innerText = entries.length;
+        document.getElementById('stat-streak').innerText = entries.length + 1;
         document.getElementById('stat-avg').innerText = avg + "%";
     }
 }
 
 window.onload = async () => {
-    await checkDailyReset(); // Check for reset as soon as page loads
+    await checkDailyReset();
     window.switchTab('today');
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'}).toUpperCase();
 };

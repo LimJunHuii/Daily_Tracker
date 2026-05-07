@@ -14,10 +14,17 @@
 <div id="app-container">
     
     <main id="view-today" class="app-view">
-        <header class="ios-header">
+<header class="ios-header">
+    <div style="display:flex; justify-content:space-between; align-items: flex-end;">
+        <div>
             <span class="date-label" id="current-date">---</span>
             <h1>Today</h1>
-        </header>
+        </div>
+        <div id="day-counter" style="background:var(--ios-blue); color:white; padding:4px 12px; border-radius:12px; font-weight:bold; font-size:14px; margin-bottom:8px;">
+            DAY 1
+        </div>
+    </div>
+</header>
 
         <div class="ios-card motivation-banner">
             <img id="motivation-img" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80" alt="Motivation">
